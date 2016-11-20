@@ -1,11 +1,9 @@
-import {AfterContentInit, ContentChild, Directive, EventEmitter, OnChanges, OnDestroy, SimpleChange} from '@angular/core';
-import {Subscription} from 'rxjs/Subscription';
-
-import {MouseEvent} from '../map-types';
-import * as mapTypes from '../services/google-maps-types';
-import {MarkerManager} from '../services/managers/marker-manager';
-
-import {SebmGoogleMapInfoWindow} from './google-map-info-window';
+import {AfterContentInit, ContentChild, Directive, EventEmitter, OnChanges, OnDestroy, SimpleChange} from "@angular/core";
+import {Subscription} from "rxjs/Subscription";
+import {MouseEvent} from "../map-types";
+import * as mapTypes from "../services/google-maps-types";
+import {MarkerManager} from "../services/managers/marker-manager";
+import {SebmGoogleMapInfoWindow} from "./google-map-info-window";
 
 let markerId = 0;
 
@@ -97,7 +95,7 @@ export class SebmGoogleMapMarker implements OnDestroy, OnChanges, AfterContentIn
   zIndex:number = 1;
 
 
-  animation:string = null;
+  animation:number = null;
 
 
   /**

@@ -1,10 +1,9 @@
-import {NgZone} from '@angular/core';
-import {TestBed, async, inject} from '@angular/core/testing';
-
-import {SebmGoogleMapMarker} from './../../directives/google-map-marker';
-import {GoogleMapsAPIWrapper} from './../google-maps-api-wrapper';
-import {Marker} from './../google-maps-types';
-import {MarkerManager} from './../managers/marker-manager';
+import {NgZone} from "@angular/core";
+import {TestBed, async, inject} from "@angular/core/testing";
+import {SebmGoogleMapMarker} from "./../../directives/google-map-marker";
+import {GoogleMapsAPIWrapper} from "./../google-maps-api-wrapper";
+import {Marker} from "./../google-maps-types";
+import {MarkerManager} from "./../managers/marker-manager";
 
 describe('MarkerManager', () => {
   beforeEach(() => {
@@ -41,6 +40,39 @@ describe('MarkerManager', () => {
                title: undefined
              });
            }));
+  });
+
+  describe('Set animation on a new marker', () => {
+    it('should create a new marker setting the animation',
+      inject(
+        [MarkerManager, GoogleMapsAPIWrapper],
+        (markerManager: MarkerManager, apiWrapper: GoogleMapsAPIWrapper) => {
+          const newMarker = new SebmGoogleMapMarker(markerManager);
+          newMarker.latitude = 34.4;
+          newMarker.longitude = 22.3;
+          newMarker.label = 'A';
+
+          const markerInstance: Marker = jasmine.createSpyObj('Marker', ['setMap', 'setAnimation']);
+          (<any>apiWrapper.createMarker).and.returnValue(Promise.resolve(markerInstance));
+
+          markerManager.addMarker(newMarker);
+          expect(apiWrapper.createMarker).toHaveBeenCalledWith({
+            position: {lat: 34.4, lng: 22.3},
+            label: 'A',
+            draggable: false,
+            icon: undefined,
+            opacity: 1,
+            visible: true,
+            zIndex: 1,
+            title: undefined
+          });
+
+          const animationType = 1;
+          newMarker.animation = 1;
+          return markerManager.updateAnimation(newMarker).then(
+            () => { expect(markerInstance.setAnimation).toHaveBeenCalledWith(animationType)});
+
+        }));
   });
 
   describe('Delete a marker', () => {
