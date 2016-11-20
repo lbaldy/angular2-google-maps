@@ -38,7 +38,7 @@ let markerId = 0;
   selector: 'sebm-google-map-marker',
   inputs: [
     'latitude', 'longitude', 'title', 'label', 'draggable: markerDraggable', 'iconUrl',
-    'openInfoWindow', 'opacity', 'visible', 'zIndex'
+    'openInfoWindow', 'opacity', 'visible', 'zIndex', 'animation'
   ],
   outputs: ['markerClick', 'dragEnd', 'mouseOver', 'mouseOut']
 })
@@ -46,47 +46,47 @@ export class SebmGoogleMapMarker implements OnDestroy, OnChanges, AfterContentIn
   /**
    * The latitude position of the marker.
    */
-  latitude: number;
+  latitude:number;
 
   /**
    * The longitude position of the marker.
    */
-  longitude: number;
+  longitude:number;
 
   /**
    * The title of the marker.
    */
-  title: string;
+  title:string;
 
   /**
    * The label (a single uppercase character) for the marker.
    */
-  label: string;
+  label:string;
 
   /**
    * If true, the marker can be dragged. Default value is false.
    */
-  draggable: boolean = false;
+  draggable:boolean = false;
 
   /**
    * Icon (the URL of the image) for the foreground.
    */
-  iconUrl: string;
+  iconUrl:string;
 
   /**
    * If true, the marker is visible
    */
-  visible: boolean = true;
+  visible:boolean = true;
 
   /**
    * Whether to automatically open the child info window when the marker is clicked.
    */
-  openInfoWindow: boolean = true;
+  openInfoWindow:boolean = true;
 
   /**
    * The marker's opacity between 0.0 and 1.0.
    */
-  opacity: number = 1;
+  opacity:number = 1;
 
   /**
    * All markers are displayed on the map in order of their zIndex, with higher values displaying in
@@ -94,38 +94,44 @@ export class SebmGoogleMapMarker implements OnDestroy, OnChanges, AfterContentIn
    * vertical position on screen, with lower markers appearing in front of markers further up the
    * screen.
    */
-  zIndex: number = 1;
+  zIndex:number = 1;
+
+
+  animation:string = null;
+
 
   /**
    * This event emitter gets emitted when the user clicks on the marker.
    */
-  markerClick: EventEmitter<void> = new EventEmitter<void>();
+  markerClick:EventEmitter<void> = new EventEmitter<void>();
 
   /**
    * This event is fired when the user stops dragging the marker.
    */
-  dragEnd: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
+  dragEnd:EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
 
   /**
    * This event is fired when the user mouses over the marker.
    */
-  mouseOver: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
+  mouseOver:EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
 
   /**
    * This event is fired when the user mouses outside the marker.
    */
-  mouseOut: EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
+  mouseOut:EventEmitter<MouseEvent> = new EventEmitter<MouseEvent>();
 
   /**
    * @internal
    */
-  @ContentChild(SebmGoogleMapInfoWindow) infoWindow: SebmGoogleMapInfoWindow;
+  @ContentChild(SebmGoogleMapInfoWindow) infoWindow:SebmGoogleMapInfoWindow;
 
-  private _markerAddedToManger: boolean = false;
-  private _id: string;
-  private _observableSubscriptions: Subscription[] = [];
+  private _markerAddedToManger:boolean = false;
+  private _id:string;
+  private _observableSubscriptions:Subscription[] = [];
 
-  constructor(private _markerManager: MarkerManager) { this._id = (markerId++).toString(); }
+  constructor(private _markerManager:MarkerManager) {
+    this._id = (markerId++).toString();
+  }
 
   /* @internal */
   ngAfterContentInit() {
@@ -135,7 +141,7 @@ export class SebmGoogleMapMarker implements OnDestroy, OnChanges, AfterContentIn
   }
 
   /** @internal */
-  ngOnChanges(changes: {[key: string]: SimpleChange}) {
+  ngOnChanges(changes:{[key:string]:SimpleChange}) {
     if (typeof this.latitude !== 'number' || typeof this.longitude !== 'number') {
       return;
     }
@@ -169,6 +175,10 @@ export class SebmGoogleMapMarker implements OnDestroy, OnChanges, AfterContentIn
     if (changes['zIndex']) {
       this._markerManager.updateZIndex(this);
     }
+
+    if (changes['animation']) {
+      this._markerManager.updateAnimation(this);
+    }
   }
 
   private _addEventListeners() {
@@ -181,32 +191,36 @@ export class SebmGoogleMapMarker implements OnDestroy, OnChanges, AfterContentIn
     this._observableSubscriptions.push(cs);
 
     const ds =
-        this._markerManager.createEventObservable<mapTypes.MouseEvent>('dragend', this)
-            .subscribe((e: mapTypes.MouseEvent) => {
-              this.dragEnd.emit(<MouseEvent>{coords: {lat: e.latLng.lat(), lng: e.latLng.lng()}});
-            });
+      this._markerManager.createEventObservable<mapTypes.MouseEvent>('dragend', this)
+        .subscribe((e:mapTypes.MouseEvent) => {
+          this.dragEnd.emit(<MouseEvent>{coords: {lat: e.latLng.lat(), lng: e.latLng.lng()}});
+        });
     this._observableSubscriptions.push(ds);
 
     const mover =
-        this._markerManager.createEventObservable<mapTypes.MouseEvent>('mouseover', this)
-            .subscribe((e: mapTypes.MouseEvent) => {
-              this.mouseOver.emit(<MouseEvent>{coords: {lat: e.latLng.lat(), lng: e.latLng.lng()}});
-            });
+      this._markerManager.createEventObservable<mapTypes.MouseEvent>('mouseover', this)
+        .subscribe((e:mapTypes.MouseEvent) => {
+          this.mouseOver.emit(<MouseEvent>{coords: {lat: e.latLng.lat(), lng: e.latLng.lng()}});
+        });
     this._observableSubscriptions.push(mover);
 
     const mout =
-        this._markerManager.createEventObservable<mapTypes.MouseEvent>('mouseout', this)
-            .subscribe((e: mapTypes.MouseEvent) => {
-              this.mouseOut.emit(<MouseEvent>{coords: {lat: e.latLng.lat(), lng: e.latLng.lng()}});
-            });
+      this._markerManager.createEventObservable<mapTypes.MouseEvent>('mouseout', this)
+        .subscribe((e:mapTypes.MouseEvent) => {
+          this.mouseOut.emit(<MouseEvent>{coords: {lat: e.latLng.lat(), lng: e.latLng.lng()}});
+        });
     this._observableSubscriptions.push(mout);
   }
 
   /** @internal */
-  id(): string { return this._id; }
+  id():string {
+    return this._id;
+  }
 
   /** @internal */
-  toString(): string { return 'SebmGoogleMapMarker-' + this._id.toString(); }
+  toString():string {
+    return 'SebmGoogleMapMarker-' + this._id.toString();
+  }
 
   /** @internal */
   ngOnDestroy() {

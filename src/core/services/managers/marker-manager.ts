@@ -9,18 +9,19 @@ import {Marker} from './../google-maps-types';
 
 @Injectable()
 export class MarkerManager {
-  private _markers: Map<SebmGoogleMapMarker, Promise<Marker>> =
-      new Map<SebmGoogleMapMarker, Promise<Marker>>();
+  private _markers:Map<SebmGoogleMapMarker, Promise<Marker>> =
+    new Map<SebmGoogleMapMarker, Promise<Marker>>();
 
-  constructor(private _mapsWrapper: GoogleMapsAPIWrapper, private _zone: NgZone) {}
+  constructor(private _mapsWrapper:GoogleMapsAPIWrapper, private _zone:NgZone) {
+  }
 
-  deleteMarker(marker: SebmGoogleMapMarker): Promise<void> {
+  deleteMarker(marker:SebmGoogleMapMarker):Promise<void> {
     const m = this._markers.get(marker);
     if (m == null) {
       // marker already deleted
       return Promise.resolve();
     }
-    return m.then((m: Marker) => {
+    return m.then((m:Marker) => {
       return this._zone.run(() => {
         m.setMap(null);
         this._markers.delete(marker);
@@ -28,40 +29,42 @@ export class MarkerManager {
     });
   }
 
-  updateMarkerPosition(marker: SebmGoogleMapMarker): Promise<void> {
+  updateMarkerPosition(marker:SebmGoogleMapMarker):Promise<void> {
     return this._markers.get(marker).then(
-        (m: Marker) => m.setPosition({lat: marker.latitude, lng: marker.longitude}));
+      (m:Marker) => m.setPosition({lat: marker.latitude, lng: marker.longitude}));
   }
 
-  updateTitle(marker: SebmGoogleMapMarker): Promise<void> {
-    return this._markers.get(marker).then((m: Marker) => m.setTitle(marker.title));
+  updateTitle(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => m.setTitle(marker.title));
   }
 
-  updateLabel(marker: SebmGoogleMapMarker): Promise<void> {
-    return this._markers.get(marker).then((m: Marker) => { m.setLabel(marker.label); });
+  updateLabel(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => {
+      m.setLabel(marker.label);
+    });
   }
 
-  updateDraggable(marker: SebmGoogleMapMarker): Promise<void> {
-    return this._markers.get(marker).then((m: Marker) => m.setDraggable(marker.draggable));
+  updateDraggable(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => m.setDraggable(marker.draggable));
   }
 
-  updateIcon(marker: SebmGoogleMapMarker): Promise<void> {
-    return this._markers.get(marker).then((m: Marker) => m.setIcon(marker.iconUrl));
+  updateIcon(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => m.setIcon(marker.iconUrl));
   }
 
-  updateOpacity(marker: SebmGoogleMapMarker): Promise<void> {
-    return this._markers.get(marker).then((m: Marker) => m.setOpacity(marker.opacity));
+  updateOpacity(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => m.setOpacity(marker.opacity));
   }
 
-  updateVisible(marker: SebmGoogleMapMarker): Promise<void> {
-    return this._markers.get(marker).then((m: Marker) => m.setVisible(marker.visible));
+  updateVisible(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => m.setVisible(marker.visible));
   }
 
-  updateZIndex(marker: SebmGoogleMapMarker): Promise<void> {
-    return this._markers.get(marker).then((m: Marker) => m.setZIndex(marker.zIndex));
+  updateZIndex(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => m.setZIndex(marker.zIndex));
   }
 
-  addMarker(marker: SebmGoogleMapMarker) {
+  addMarker(marker:SebmGoogleMapMarker) {
     const markerPromise = this._mapsWrapper.createMarker({
       position: {lat: marker.latitude, lng: marker.longitude},
       label: marker.label,
@@ -75,15 +78,19 @@ export class MarkerManager {
     this._markers.set(marker, markerPromise);
   }
 
-  getNativeMarker(marker: SebmGoogleMapMarker): Promise<Marker> {
+  getNativeMarker(marker:SebmGoogleMapMarker):Promise<Marker> {
     return this._markers.get(marker);
   }
 
-  createEventObservable<T>(eventName: string, marker: SebmGoogleMapMarker): Observable<T> {
-    return Observable.create((observer: Observer<T>) => {
-      this._markers.get(marker).then((m: Marker) => {
-        m.addListener(eventName, (e: T) => this._zone.run(() => observer.next(e)));
+  createEventObservable<T>(eventName:string, marker:SebmGoogleMapMarker):Observable<T> {
+    return Observable.create((observer:Observer<T>) => {
+      this._markers.get(marker).then((m:Marker) => {
+        m.addListener(eventName, (e:T) => this._zone.run(() => observer.next(e)));
       });
     });
+  }
+
+  updateAnimation(marker:SebmGoogleMapMarker):Promise<void> {
+    return this._markers.get(marker).then((m:Marker) => m.setAnimation(marker.animation));
   }
 }
